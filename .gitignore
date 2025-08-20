@@ -1,0 +1,69 @@
+# OS-specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# IDEs and editors
+.vscode/
+.idea/
+*.code-workspace
+
+# User-specific files
+*.swp
+*.swo
+*.swn
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.old
+
+# Environment & secrets
+.env
+*.env
+.env.*
+
+# Compiled files and build artifacts
+bin/
+obj/
+out/
+
+# Azure Functions & Logic Apps
+local.settings.json
+*.user
+*.suo
+
+# Python cache (if OpenAI agent uses it)
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Node
+node_modules/
+npm-debug.log
+
+# Terraform / Bicep
+*.tfstate
+*.tfstate.*
+*.bicepparam
+
+# CI/CD artifacts
+*.zip
+dist/
+build/
+
+# GitHub workflow cache
+.github/workflows/.DS_Store
+
+# Visual Studio and JetBrains
+*.vs/
+*.idea/
+*.sln.docstates
+
+# Don't ignore templates or actual code
+!*.bicep
+!*.ps1
+!*.csx
+!*.json

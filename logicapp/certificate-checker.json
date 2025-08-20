@@ -1,0 +1,113 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowDefinition.json#",
+    "actions": {
+      "HTTP_Get_Certificates": {
+        "type": "Http",
+        "inputs": {
+          "method": "GET",
+          "uri": "https://{{parameters('KeyVaultName')}}.vault.azure.net/certificates?api-version=7.2",
+          "authentication": {
+            "type": "ManagedServiceIdentity"
+          }
+        },
+        "runAfter": {}
+      },
+      "Parse_Response": {
+        "type": "ParseJson",
+        "inputs": {
+          "content": "@body('HTTP_Get_Certificates')",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "expires": {
+                          "type": "string"
+                        },
+                        "created": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "runAfter": {
+          "HTTP_Get_Certificates": [
+            "Succeeded"
+          ]
+        }
+      },
+      "ForEach_Certificate": {
+        "type": "Foreach",
+        "foreach": "@body('Parse_Response')?['value']",
+        "actions": {
+          "Check_Expiry": {
+            "type": "If",
+            "expression": {
+              "lessOrEquals": [
+                "@sub(ticks(item()?['attributes']?['expires']), ticks(utcNow()))",
+                "@mul(parameters('DaysToExpiry'), 864000000000)"
+              ]
+            },
+            "actions": {
+              "Call_Policy_Evaluator": {
+                "type": "Http",
+                "inputs": {
+                  "method": "POST",
+                  "uri": "{{parameters('FunctionPolicyUri')}}",
+                  "body": {
+                    "issuer": "DigiCert",
+                    "expires": "@{item()?['attributes']?['expires']}",
+                    "thumbprint": "XYZ123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "runAfter": {
+          "Parse_Response": [
+            "Succeeded"
+          ]
+        }
+      }
+    },
+    "parameters": {
+      "KeyVaultName": {
+        "type": "string",
+        "defaultValue": "sample-vault"
+      },
+      "DaysToExpiry": {
+        "type": "int",
+        "defaultValue": 30
+      },
+      "FunctionPolicyUri": {
+        "type": "string",
+        "defaultValue": "https://sample-function-url/evaluate"
+      }
+    },
+    "triggers": {
+      "Recurrence": {
+        "type": "Recurrence",
+        "recurrence": {
+          "frequency": "Day",
+          "interval": 1
+        }
+      }
+    }
+  }
+}
