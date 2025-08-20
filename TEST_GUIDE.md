@@ -73,6 +73,27 @@ Go to your GitHub repo → Settings → Secrets → Actions:
 
 ---
 
+### Step 3: Alternative: Test Using `curl` Command (Direct Function Trigger)
+
+You can test the Azure Function endpoint locally with:
+
+```bash
+curl -X POST http://localhost:7071/api/CertPolicyEvaluator   -H "Content-Type: application/json"   -d '{
+    "Issuer": "DigiCert",
+    "Expires": "2024-12-31",
+    "Thumbprint": "123"
+}'
+```
+
+Expected response:
+
+```json
+{
+  "Action": "AutoRenew",
+  "Reason": "Certificate expires in XX days. Policy evaluated based on issuer and thumbprint."
+}
+```
+
 ### Step 4: Simulated Auto-Renew Script Execution
 
 - If expiration condition is met, `CertAutoRenew` runs.
@@ -113,7 +134,7 @@ Go to your GitHub repo → Settings → Secrets → Actions:
 
 ---
 
-## 📎 Related Files
+## Related Files
 
 - `arm-templates/main.bicep`
 - `functionapp/run.csx`
