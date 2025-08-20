@@ -7,16 +7,21 @@ on:
 
 jobs:
   deploy:
+    name: Deploy Bicep
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    environment: production   # 👈 Add this here
 
-    - name: Deploy Bicep
-      run: |
-        az deployment group create \
-          --resource-group my-rg \
-          --template-file ./arm-templates/main.bicep \
-          --parameters environment=prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Bicep
+        run: |
+          az deployment group create \
+            --resource-group my-resource-group \
+            --template-file ./arm-templates/main.bicep
