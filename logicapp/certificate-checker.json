@@ -1,0 +1,45 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Check_Certificate_Policy": {
+                "type": "Function",
+                "inputs": {
+                    "body": {
+                        "Issuer": "@triggerBody()?['Issuer']",
+                        "Expires": "@triggerBody()?['Expires']",
+                        "Thumbprint": "@triggerBody()?['Thumbprint']"
+                    },
+                    "function": {
+                        "id": "[resourceId('Microsoft.Web/sites/functions', parameters('functionAppName'), 'CertPolicyEvaluator')]"
+                    }
+                },
+                "runAfter": {}
+            }
+        },
+        "triggers": {
+            "manual": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "schema": {
+                        "properties": {
+                            "Expires": {
+                                "type": "string"
+                            },
+                            "Issuer": {
+                                "type": "string"
+                            },
+                            "Thumbprint": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    }
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {}
+    }
+}
