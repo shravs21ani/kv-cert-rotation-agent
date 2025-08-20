@@ -65,6 +65,17 @@ Go to your GitHub repo → Settings → Secrets → Actions:
 
 ---
 
+### Step 3: Alternative: Test Using `curl` Command (Direct Logic App)
+
+```bash
+curl -X POST https://<your-function-app>.azurewebsites.net/api/CertAutoRenew \
+  -H "Content-Type: application/json" \
+  -d '{
+    "certName": "my-test-cert",
+    "vaultUri": "https://my-keyvault.vault.azure.net/"
+  }'
+```
+
 ### Step 3: Monitor Azure Function Execution
 
 - The Logic App will invoke the Azure Function.

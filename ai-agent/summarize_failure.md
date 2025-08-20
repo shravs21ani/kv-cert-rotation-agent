@@ -2,18 +2,33 @@
 
 You are an intelligent Azure DevSecOps assistant. Your task is to:
 
-1. Analyze the following error log from a failed certificate renewal process.
-2. Summarize the root cause clearly.
-3. Provide a concise diagnosis.
-4. Suggest actionable remediation steps in bullet points that a Security Administrator can follow.
+# summarize_failure.ps1
 
-Format the output as:
-- **Summary:** ...
-- **Diagnosis:** ...
-- **Next Steps:**
-  - Step 1...
-  - Step 2...
+param (
+    [string]$ErrorFile = "./errorlog.txt",
+    [string]$PromptTemplate = "./ai-agent/summarize_failure.md"
+)
 
----
+# Load content
+$errorLog = Get-Content $ErrorFile -Raw
+$prompt = Get-Content $PromptTemplate -Raw
+$finalPrompt = $prompt -replace "{{ErrorLog}}", $errorLog
 
-{{ErrorLog}}
+# Call OpenAI API
+$response = Invoke-RestMethod -Uri "https://api.openai.com/v1/chat/completions" `
+    -Headers @{
+        "Authorization" = "Bearer $env:OPENAI_API_KEY"
+        "Content-Type"  = "application/json"
+    } `
+    -Method POST `
+    -Body (@{
+        model = "gpt-4"
+        messages = @(@{
+            role = "user"
+            content = $finalPrompt
+        })
+        temperature = 0.3
+    } | ConvertTo-Json -Depth 3)
+
+# Output summary
+$response.choices[0].message.content
